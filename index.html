@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NODAR SHONIA | Sound Designer</title>
+    
+    <!-- Fonts: Syncopate (Brutalist Wide) & Space Mono (Technical) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        deep: '#050505',
+                        cinema: '#1A1A1A',
+                        recording: '#FF3333',
+                        offwhite: '#EAEAEA',
+                        subtle: '#333333'
+                    },
+                    fontFamily: {
+                        header: ['Syncopate', 'sans-serif'],
+                        mono: ['Space Mono', 'monospace'],
+                    },
+                    backgroundImage: {
+                        'noise': "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+')",
+                    },
+                    cursor: {
+                        'none': 'none',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- GSAP & Lenis -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --cursor-size: 20px;
+        }
+        
+        html {
+            scroll-behavior: auto; /* Let Lenis handle smoothness */
+        }
+
+        body {
+            background-color: #050505;
+            color: #EAEAEA;
+            overflow-x: hidden;
+        }
+
+        /* Custom cursor only on desktop */
+        @media (min-width: 768px) {
+            body {
+                cursor: none; /* Custom cursor implementation */
+            }
+        }
+
+        /* Keep the CSS snap rules if you want, but Lenis is doing the real snapping.
+           If CSS snap fights with Lenis on some browsers, disable it:
+           main#main-content { scroll-snap-type: none; }
+           section { scroll-snap-align: none; }
+        */
+
+        /* Magnetic Scroll Snapping */
+        main#main-content {
+            scroll-snap-type: y mandatory;
+        }
+
+        section {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF3333;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 640px) {
+            ::-webkit-scrollbar {
+                width: 4px;
+            }
+        }
+
+        /* Custom Cursor Elements */
+        #cursor-dot, #cursor-ring {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+            mix-blend-mode: exclusion;
+        }
+        #cursor-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #FF3333;
+        }
+        #cursor-ring {
+            width: 32px;
+            height: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+        }
+        body.hover-active #cursor-ring {
+            width: 64px;
+            height: 64px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: #FF3333;
+        }
+
+        /* Responsive cursor */
+        @media (max-width: 768px) {
+            #cursor-dot {
+                width: 4px;
+                height: 4px;
+            }
+            #cursor-ring {
+                width: 24px;
+                height: 24px;
+            }
+            body.hover-active #cursor-ring {
+                width: 48px;
+                height: 48px;
+            }
+        }
+
+        /* Utility */
+        .clip-text-image {
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .grain-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJub2lzZSI+PGZlVHVyYnVsZW5jZSB0eXBlPSJmcmFjdGFsTm9pc2UiIGJhc2VGcmVxdWVuY3k9IjAuNjUiIG51bU9jdGF2ZXM9IjMiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbm9pc2UpIiBvcGFjaXR5PSIwLjA1Ii8+PC9zdmc+');
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        /* Reveal Animation Classes */
+        .reveal-text {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        }
+        
+        .char {
+            display: inline-block;
+        }
+
+        /* Floating Image Preview */
+        .floating-preview {
+            position: fixed;
+            width: 300px;
+            height: 450px;
+            background-color: #050505; /* Deep black to match bg */
+            z-index: 50;
+            pointer-events: none;
+            opacity: 0;
+            transform: scale(0.8);
+            border: 1px solid #333;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .floating-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Makes image cover entire container */
+            background-color: #050505;
+            filter: grayscale(100%) contrast(120%);
+        }
+
+        /* Glitch Effect for Hover */
+        .glitch-hover:hover {
+            animation: glitch-anim 0.3s infinite;
+        }
+
+        @keyframes glitch-anim {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+
+        /* Selected Works horizontal slider */
+        #work {
+            position: relative;
+        }
+
+        #work::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(1200px 500px at 10% 15%, rgba(255, 51, 51, 0.16), transparent 60%),
+                radial-gradient(900px 450px at 85% 80%, rgba(255, 255, 255, 0.06), transparent 65%);
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .work-slider {
+            position: relative;
+            z-index: 1;
+        }
+
+        .work-stage {
+            position: relative;
+            height: clamp(420px, 72vh, 760px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0));
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+            perspective: 1200px;
+            isolation: isolate;
+        }
+
+        .work-stage::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(255, 255, 255, 0.04),
+                rgba(255, 255, 255, 0.04) 1px,
+                transparent 1px,
+                transparent 4px
+            );
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .work-stage::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.45) 70%);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .work-slide {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            will-change: transform, opacity;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .work-slide.is-active {
+            pointer-events: auto;
+        }
+
+        .work-ui {
+            position: absolute;
+            top: 50%;
+            right: 1.5rem;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .work-progress-track {
+            position: relative;
+            width: 2px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.15);
+            overflow: hidden;
+        }
+
+        .work-progress-bar {
+            position: absolute;
+            inset: 0;
+            background: #FF3333;
+            transform: scaleY(0);
+            transform-origin: bottom;
+            transition: transform 0.4s ease;
+        }
+
+        .work-hint {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+
+        @media (max-width: 768px) {
+            .work-stage {
+                height: clamp(360px, 64vh, 620px);
+            }
+
+            .work-ui {
+                right: 1rem;
+                gap: 0.5rem;
+            }
+
+            .work-progress-track {
+                height: 90px;
+            }
+        }
+    </style>
+</head>
+<body class="font-mono selection:bg-recording selection:text-white">
+
+    <!-- Custom Cursor -->
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring"></div>
+    
+    <!-- Film Grain Overlay -->
+    <div class="grain-overlay"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full p-3 sm:p-4 md:p-6 z-50 flex justify-between items-center mix-blend-difference">
+        <div class="text-[10px] sm:text-xs tracking-widest font-bold interactable">
+            NODAR SHONIA <span class="text-recording">///</span>
+        </div>
+
+        <!-- Status -->
+        <div class="flex items-center gap-3 sm:gap-4 md:gap-6">
+            <div class="hidden lg:flex items-center gap-2 text-[10px] tracking-widest uppercase opacity-70">
+                <span class="w-2 h-2 bg-recording rounded-full animate-pulse shadow-[0_0_10px_#FF3333]"></span>
+                Available for Work · 2025
+            </div>
+        </div>
+    </nav>
+
+    <!-- Floating Preview for Credits -->
+    <div class="floating-preview" id="credit-preview">
+        <div id="preview-placeholder" class="w-full h-full bg-cinema flex items-center justify-center text-subtle text-4xl font-header">
+            <!-- Dynamic Content -->
+        </div>
+    </div>
+
+    <!-- Main Content Wrapper for Lenis -->
+    <main id="main-content">
+
+        <!-- HERO SECTION -->
+        <section class="scroll-checkpoint relative min-h-screen w-full flex flex-col justify-center items-center overflow-hidden border-b border-subtle/20 py-20 sm:py-24">
+            <!-- Abstract Canvas Background -->
+            <canvas id="noise-canvas" class="absolute inset-0 w-full h-full opacity-30"></canvas>
+
+            <div class="relative z-10 text-center px-4 max-w-6xl mx-auto">
+                <h1 class="font-header text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-tighter leading-none mb-4 reveal-header">
+                    NODAR<br><span class="text-stroke text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500">SHONIA</span>
+                </h1>
+
+                <div class="w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto h-[1px] bg-subtle my-4 sm:my-6 overflow-hidden relative">
+                    <div class="absolute inset-0 bg-recording w-1/3 animate-[loading_4s_ease-in-out_infinite]"></div>
+                </div>
+
+                <p class="font-mono text-[10px] sm:text-xs md:text-sm tracking-[0.2em] sm:tracking-[0.3em] uppercase text-gray-400 reveal-sub max-w-xs sm:max-w-sm md:max-w-none mx-auto">
+                    Sound Designer <span class="text-recording">//</span> Foley Editor <span class="text-recording">//</span> Composer
+                </p>
+            </div>
+
+            <!-- Scroll Indicator -->
+            <div class="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 text-[9px] sm:text-[10px] tracking-widest flex flex-col items-center gap-2 opacity-50">
+                <span>SCROLL TO LISTEN</span>
+                <div class="w-[1px] h-8 sm:h-12 bg-gradient-to-b from-recording to-transparent"></div>
+            </div>
+
+        </section>
+
+        <!-- FEATURED WORK (Immersive) -->
+        <section id="work" class="scroll-checkpoint min-h-screen py-24 px-4 md:px-12">
+            <div class="mb-12 flex items-end gap-4 border-b border-subtle/30 pb-4">
+                <span class="text-recording font-mono text-sm">01</span>
+                <h2 class="font-header text-2xl md:text-4xl">Selected Works</h2>
+            </div>
+
+            <!-- Desktop Slider -->
+            <div class="work-slider mt-10 hidden md:block">
+                <div class="work-stage">
+                    <!-- Project 1 -->
+            <div class="project-card work-slide  w-full h-full group interactable border border-subtle/20 bg-cinema overflow-hidden">
+                <!-- Project Image -->
+                <img src="https://www.hollywoodreporter.com/wp-content/uploads/2025/05/KMBO_1.4.1-H-2025.jpg?w=1296&h=730&crop=1" alt="Lucky Lu" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-[1.5s] ease-out group-hover:scale-105 grayscale group-hover:grayscale-0">
+
+                <!-- Content -->
+                <div class="absolute inset-0 flex flex-col justify-between p-8 md:p-16 z-10">
+                    <div class="flex justify-between items-start">
+                        <span class="font-mono text-xs border border-subtle px-2 py-1 rounded-full bg-deep/50 backdrop-blur-sm">FEATURE FILM</span>
+                        <span class="font-header text-4xl md:text-6xl text-white/10 group-hover:text-white/20 transition-colors">2025</span>
+                    </div>
+
+                    <div>
+                        <h3 class="font-header text-5xl md:text-8xl mb-4 group-hover:text-recording transition-colors duration-500">LUCKY LU</h3>
+                        <div class="h-[1px] w-0 group-hover:w-full bg-recording transition-all duration-700 ease-in-out mb-6"></div>
+                        <ul class="font-mono text-sm text-gray-400 flex flex-col md:flex-row gap-4 md:gap-12">
+                            <li><span class="text-recording">ROLE:</span> Foley Editor / Sound Dept</li>
+                            <li><span class="text-recording">STUDIO:</span> Postred</li>
+                            <li><span class="text-recording">STATUS:</span> Post-Production</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 2 -->
+            <div class="project-card work-slide  w-full h-full group interactable border border-subtle/20 bg-cinema overflow-hidden">
+                <!-- Project Image -->
+                <img src="https://d32qys9a6wm9no.cloudfront.net/images/tvs/backdrop/89/6adf4235901cccbc3c620b28f242e53b_1280x720.jpg?t=1740611300" alt="Dying For Sex" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-[1.5s] ease-out group-hover:scale-105 grayscale group-hover:grayscale-0">
+
+                <div class="absolute inset-0 flex flex-col justify-between p-8 md:p-16 z-10">
+                    <div class="flex justify-between items-start">
+                        <span class="font-mono text-xs border border-subtle px-2 py-1 rounded-full bg-deep/50 backdrop-blur-sm">TV SERIES</span>
+                        <span class="font-header text-4xl md:text-6xl text-white/10 group-hover:text-white/20 transition-colors">2025</span>
+                    </div>
+
+                    <div>
+                        <h3 class="font-header text-5xl md:text-8xl mb-4 group-hover:text-recording transition-colors duration-500">DYING FOR SEX</h3>
+                        <div class="h-[1px] w-0 group-hover:w-full bg-recording transition-all duration-700 ease-in-out mb-6"></div>
+                        <ul class="font-mono text-sm text-gray-400 flex flex-col md:flex-row gap-4 md:gap-12">
+                            <li><span class="text-recording">ROLE:</span> Foley Editor</li>
+                            <li><span class="text-recording">FORMAT:</span> 8 Episodes</li>
+                            <li><span class="text-recording">NETWORK:</span> FX / Hulu</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project 3 -->
+            <div class="project-card work-slide  w-full h-full group interactable border border-subtle/20 bg-cinema overflow-hidden">
+                <!-- Project Image -->
+                <img src="https://static.cdn.turner.com/styles/header_image_1500x500_cropped/s3/2025-11/the_family_mcmullen_ho_ka_27x40_publicity_0.jpg?h=61d0ba11&itok=kuHKNm8f" alt="The Family McMullen" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-[1.5s] ease-out group-hover:scale-105 grayscale group-hover:grayscale-0">
+
+                <div class="absolute inset-0 flex flex-col justify-between p-8 md:p-16 z-10">
+                    <div class="flex justify-between items-start">
+                        <span class="font-mono text-xs border border-subtle px-2 py-1 rounded-full bg-deep/50 backdrop-blur-sm">FEATURE FILM</span>
+                        <span class="font-header text-4xl md:text-6xl text-white/10 group-hover:text-white/20 transition-colors">2025</span>
+                    </div>
+
+                    <div>
+                        <h3 class="font-header text-5xl md:text-8xl mb-4 group-hover:text-recording transition-colors duration-500">THE FAMILY MCMULLEN</h3>
+                        <div class="h-[1px] w-0 group-hover:w-full bg-recording transition-all duration-700 ease-in-out mb-6"></div>
+                        <ul class="font-mono text-sm text-gray-400 flex flex-col md:flex-row gap-4 md:gap-12">
+                            <li><span class="text-recording">ROLE:</span> Foley Editor</li>
+                            <li><span class="text-recording">STUDIO:</span> Postred</li>
+                            <li><span class="text-recording">GENRE:</span> Drama</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="work-ui text-[10px] tracking-[0.35em] uppercase text-gray-400 font-mono">
+                <div class="flex items-baseline gap-2">
+                    <span class="font-header text-3xl md:text-4xl tracking-tight text-white/80" data-work-index>01</span>
+                    <span class="text-recording text-xs">/</span>
+                    <span class="text-gray-500 text-xs" data-work-total>03</span>
+                </div>
+                <div class="work-progress-track">
+                    <div class="work-progress-bar" data-work-progress></div>
+                </div>
+                <span class="work-hint text-gray-500">SCROLL TO SHIFT</span>
+            </div>
+                </div>
+            </div>
+
+            <!-- Mobile Static Layout -->
+            <div class="space-y-12 md:hidden">
+                <!-- Project 1 -->
+                <div class="project-card relative w-full h-[60vh] group interactable border border-subtle/20 bg-cinema overflow-hidden">
+                    <!-- Project Image -->
+                    <img src="https://www.hollywoodreporter.com/wp-content/uploads/2025/05/KMBO_1.4.1-H-2025.jpg?w=1296&h=730&crop=1" alt="Lucky Lu" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-[1.5s] ease-out group-hover:scale-105 grayscale group-hover:grayscale-0">
+
+                    <!-- Content -->
+                    <div class="absolute inset-0 flex flex-col justify-between p-6 z-10">
+                        <div class="flex justify-between items-start">
+                            <span class="font-mono text-xs border border-subtle px-2 py-1 rounded-full bg-deep/50 backdrop-blur-sm">FEATURE FILM</span>
+                            <span class="font-header text-2xl text-white/10 group-hover:text-white/20 transition-colors">2025</span>
+                        </div>
+
+                        <div>
+                            <h3 class="font-header text-3xl mb-3 group-hover:text-recording transition-colors duration-500">LUCKY LU</h3>
+                            <div class="h-[1px] w-0 group-hover:w-full bg-recording transition-all duration-700 ease-in-out mb-4"></div>
+                            <ul class="font-mono text-sm text-gray-400 space-y-2">
+                                <li><span class="text-recording">ROLE:</span> Foley Editor / Sound Dept</li>
+                                <li><span class="text-recording">STUDIO:</span> Postred</li>
+                                <li><span class="text-recording">STATUS:</span> Post-Production</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="project-card relative w-full h-[60vh] group interactable border border-subtle/20 bg-cinema overflow-hidden">
+                    <!-- Project Image -->
+                    <img src="https://d32qys9a6wm9no.cloudfront.net/images/tvs/backdrop/89/6adf4235901cccbc3c620b28f242e53b_1280x720.jpg?t=1740611300" alt="Dying For Sex" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-[1.5s] ease-out group-hover:scale-105 grayscale group-hover:grayscale-0">
+
+                    <div class="absolute inset-0 flex flex-col justify-between p-6 z-10">
+                        <div class="flex justify-between items-start">
+                            <span class="font-mono text-xs border border-subtle px-2 py-1 rounded-full bg-deep/50 backdrop-blur-sm">TV SERIES</span>
+                            <span class="font-header text-2xl text-white/10 group-hover:text-white/20 transition-colors">2025</span>
+                        </div>
+
+                        <div>
+                            <h3 class="font-header text-3xl mb-3 group-hover:text-recording transition-colors duration-500">DYING FOR SEX</h3>
+                            <div class="h-[1px] w-0 group-hover:w-full bg-recording transition-all duration-700 ease-in-out mb-4"></div>
+                            <ul class="font-mono text-sm text-gray-400 space-y-2">
+                                <li><span class="text-recording">ROLE:</span> Foley Editor</li>
+                                <li><span class="text-recording">FORMAT:</span> 8 Episodes</li>
+                                <li><span class="text-recording">NETWORK:</span> FX / Hulu</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="project-card relative w-full h-[60vh] group interactable border border-subtle/20 bg-cinema overflow-hidden">
+                    <!-- Project Image -->
+                    <img src="https://static.cdn.turner.com/styles/header_image_1500x500_cropped/s3/2025-11/the_family_mcmullen_ho_ka_27x40_publicity_0.jpg?h=61d0ba11&itok=kuHKNm8f" alt="The Family McMullen" class="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-all duration-[1.5s] ease-out group-hover:scale-105 grayscale group-hover:grayscale-0">
+
+                    <div class="absolute inset-0 flex flex-col justify-between p-6 z-10">
+                        <div class="flex justify-between items-start">
+                            <span class="font-mono text-xs border border-subtle px-2 py-1 rounded-full bg-deep/50 backdrop-blur-sm">FEATURE FILM</span>
+                            <span class="font-header text-2xl text-white/10 group-hover:text-white/20 transition-colors">2025</span>
+                        </div>
+
+                        <div>
+                            <h3 class="font-header text-3xl mb-3 group-hover:text-recording transition-colors duration-500">THE FAMILY MCMULLEN</h3>
+                            <div class="h-[1px] w-0 group-hover:w-full bg-recording transition-all duration-700 ease-in-out mb-4"></div>
+                            <ul class="font-mono text-sm text-gray-400 space-y-2">
+                                <li><span class="text-recording">ROLE:</span> Foley Editor</li>
+                                <li><span class="text-recording">STUDIO:</span> Postred</li>
+                                <li><span class="text-recording">GENRE:</span> Drama</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CREDITS LIST (Data Forward) -->
+        <section class="scroll-checkpoint min-h-screen py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-12 bg-deep border-t border-subtle/20">
+            <div class="mb-8 sm:mb-12 flex items-end gap-3 sm:gap-4">
+                <span class="text-recording font-mono text-xs sm:text-sm">02</span>
+                <h2 class="font-header text-xl sm:text-2xl md:text-3xl lg:text-4xl">Full Credits</h2>
+            </div>
+
+            <div class="w-full max-w-7xl mx-auto">
+                <!-- Headers - Hidden on mobile -->
+                <div class="hidden sm:grid grid-cols-12 gap-4 pb-4 border-b border-subtle/50 text-xs font-mono text-gray-500 uppercase tracking-wider mb-4">
+                    <div class="col-span-1">Year</div>
+                    <div class="col-span-5 md:col-span-4">Project</div>
+                    <div class="col-span-4 md:col-span-4">Role</div>
+                    <div class="col-span-2 md:col-span-3 text-right">Type</div>
+                </div>
+
+                <!-- Rows -->
+                <div id="credits-container">
+                    <!-- Javascript generates these or use static HTML -->
+                    <div class="credit-row grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 py-4 sm:py-6 border-b border-subtle/20 interactable hover:bg-cinema/50 transition-colors cursor-none group relative" data-image="The Mastermind">
+                        <!-- Mobile Layout -->
+                        <div class="sm:hidden flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <div class="font-bold text-base group-hover:text-recording transition-colors">The Mastermind</div>
+                                <div class="font-mono text-xs border border-subtle/30 rounded px-2 py-1">Feature</div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="font-mono text-gray-400">Foley Editor (Postred)</div>
+                                <div class="font-mono text-gray-400">2025</div>
+                            </div>
+                        </div>
+                        <!-- Desktop Layout -->
+                        <div class="hidden sm:block col-span-1 font-mono text-gray-400">2025</div>
+                        <div class="hidden sm:block col-span-5 md:col-span-4 font-bold text-lg group-hover:text-recording transition-colors">The Mastermind</div>
+                        <div class="hidden sm:block col-span-4 md:col-span-4 font-mono text-sm text-gray-400">Foley Editor (Postred)</div>
+                        <div class="hidden sm:block col-span-2 md:col-span-3 text-right font-mono text-xs border border-subtle/30 rounded px-2 py-1 w-fit justify-self-end">Feature</div>
+                    </div>
+
+                    <div class="credit-row grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 py-4 sm:py-6 border-b border-subtle/20 interactable hover:bg-cinema/50 transition-colors cursor-none group relative" data-image="Dying For Sex">
+                        <!-- Mobile Layout -->
+                        <div class="sm:hidden flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <div class="font-bold text-base group-hover:text-recording transition-colors">Dying for Sex</div>
+                                <div class="font-mono text-xs border border-subtle/30 rounded px-2 py-1">Series</div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="font-mono text-gray-400">Foley Editor</div>
+                                <div class="font-mono text-gray-400">2025</div>
+                            </div>
+                        </div>
+                        <!-- Desktop Layout -->
+                        <div class="hidden sm:block col-span-1 font-mono text-gray-400">2025</div>
+                        <div class="hidden sm:block col-span-5 md:col-span-4 font-bold text-lg group-hover:text-recording transition-colors">Dying for Sex</div>
+                        <div class="hidden sm:block col-span-4 md:col-span-4 font-mono text-sm text-gray-400">Foley Editor</div>
+                        <div class="hidden sm:block col-span-2 md:col-span-3 text-right font-mono text-xs border border-subtle/30 rounded px-2 py-1 w-fit justify-self-end">Series</div>
+                    </div>
+
+                    <div class="credit-row grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 py-4 sm:py-6 border-b border-subtle/20 interactable hover:bg-cinema/50 transition-colors cursor-none group relative" data-image="Lucky Lu">
+                        <!-- Mobile Layout -->
+                        <div class="sm:hidden flex flex-col gap-2">
+                            <div class="flex items-center justify-between">
+                                <div class="font-bold text-base group-hover:text-recording transition-colors">Lucky Lu</div>
+                                <div class="font-mono text-xs border border-subtle/30 rounded px-2 py-1">Feature</div>
+                            </div>
+                            <div class="flex items-center justify-between text-sm">
+                                <div class="font-mono text-gray-400">Foley Editor / Sound Dept</div>
+                                <div class="font-mono text-gray-400">2025</div>
+                            </div>
+                        </div>
+                        <!-- Desktop Layout -->
+                        <div class="hidden sm:block col-span-1 font-mono text-gray-400">2025</div>
+                        <div class="hidden sm:block col-span-5 md:col-span-4 font-bold text-lg group-hover:text-recording transition-colors">Lucky Lu</div>
+                        <div class="hidden sm:block col-span-4 md:col-span-4 font-mono text-sm text-gray-400">Foley Editor / Sound Dept</div>
+                        <div class="hidden sm:block col-span-2 md:col-span-3 text-right font-mono text-xs border border-subtle/30 rounded px-2 py-1 w-fit justify-self-end">Feature</div>
+                    </div>
+
+                    <div class="credit-row grid grid-cols-1 sm:grid-cols-12 gap-4 py-6 border-b border-subtle/20 interactable hover:bg-cinema/50 transition-colors cursor-none group relative" data-image="The Family McMullen">
+                        <div class="col-span-1 font-mono text-gray-400">2025</div>
+                        <div class="col-span-5 md:col-span-4 font-bold text-lg group-hover:text-recording transition-colors">The Family McMullen</div>
+                        <div class="col-span-4 md:col-span-4 font-mono text-sm text-gray-400">Foley Editor</div>
+                        <div class="col-span-2 md:col-span-3 text-right font-mono text-xs border border-subtle/30 rounded px-2 py-1 w-fit justify-self-end">Feature</div>
+                    </div>
+
+                    <div class="credit-row grid grid-cols-1 sm:grid-cols-12 gap-4 py-6 border-b border-subtle/20 interactable hover:bg-cinema/50 transition-colors cursor-none group relative" data-image="M.R.I.">
+                        <div class="col-span-1 font-mono text-gray-400">2025</div>
+                        <div class="col-span-5 md:col-span-4 font-bold text-lg group-hover:text-recording transition-colors">M.R.I.</div>
+                        <div class="col-span-4 md:col-span-4 font-mono text-sm text-gray-400">Foley Editor</div>
+                        <div class="col-span-2 md:col-span-3 text-right font-mono text-xs border border-subtle/30 rounded px-2 py-1 w-fit justify-self-end">Short</div>
+                    </div>
+
+                    <div class="credit-row grid grid-cols-1 sm:grid-cols-12 gap-4 py-6 border-b border-subtle/20 interactable hover:bg-cinema/50 transition-colors cursor-none group relative" data-image="An Inexact Science">
+                        <div class="col-span-1 font-mono text-gray-400">2024</div>
+                        <div class="col-span-5 md:col-span-4 font-bold text-lg group-hover:text-recording transition-colors">An Inexact Science</div>
+                        <div class="col-span-4 md:col-span-4 font-mono text-sm text-gray-400">Composer</div>
+                        <div class="col-span-2 md:col-span-3 text-right font-mono text-xs border border-subtle/30 rounded px-2 py-1 w-fit justify-self-end">Music</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABOUT (Split Screen) -->
+        <section class="scroll-checkpoint h-[100vh] grid grid-cols-1 lg:grid-cols-2 border-t border-subtle/20">
+            <!-- Visual Side -->
+            <div class="bg-cinema relative min-h-[40vh] sm:min-h-[50vh] lg:min-h-screen overflow-hidden grayscale contrast-125 lg:border-r border-subtle/20 order-2 lg:order-1">
+                <img src="/foli-studio.png" alt="folio-studio" class="w-full h-full object-cover">
+                <!-- Simulating a studio light leak -->
+                <div class="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-white/10 to-transparent"></div>
+            </div>
+
+            <!-- Content Side -->
+            <div class="p-6 sm:p-8 md:p-12 lg:p-16 xl:p-24 flex flex-col justify-center bg-deep relative order-1 lg:order-2">
+                <span class="text-recording font-mono text-xs sm:text-sm mb-4 sm:mb-6">03 // PROFILE</span>
+                <h3 class="font-header text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight mb-6 sm:mb-8">
+                    I BUILD SONIC WORLDS AUDIENCES FEEL BUT NEVER SEE.
+                </h3>
+                <p class="font-mono text-gray-400 text-xs sm:text-sm leading-relaxed mb-8 sm:mb-12 max-w-none lg:max-w-md">
+                    With over three years of studio experience at Postred (Georgia, 2022–2025), I specialize in narrative sound for feature films and episodic series. My work bridges raw production audio and the final cinematic mix, ensuring every footstep, texture, and environment serves the story.
+                </p>
+
+                <div class="border-t border-subtle/30 pt-6 sm:pt-8">
+                    <span class="text-[10px] sm:text-xs uppercase tracking-widest text-gray-500 mb-4 block">Signal Chain</span>
+                    <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-4 sm:gap-6 lg:gap-8 text-offwhite/80">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="mic" class="w-3 h-3 sm:w-4 sm:h-4 text-recording"></i>
+                            <span class="font-mono text-xs sm:text-sm">Pro Tools</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="scissors" class="w-3 h-3 sm:w-4 sm:h-4 text-recording"></i>
+                            <span class="font-mono text-xs sm:text-sm">Reaper</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="waves" class="w-3 h-3 sm:w-4 sm:h-4 text-recording"></i>
+                            <span class="font-mono text-xs sm:text-sm">iZotope RX</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="database" class="w-3 h-3 sm:w-4 sm:h-4 text-recording"></i>
+                            <span class="font-mono text-xs sm:text-sm">Soundminer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CONTACT (Minimal Handoff) -->
+        <section class="scroll-checkpoint min-h-screen py-20 sm:py-24 md:py-32 px-4 sm:px-6 md:px-12 flex flex-col items-center justify-center text-center bg-black relative overflow-hidden">
+            <!-- Background Pulse -->
+            <div class="absolute w-[300px] sm:w-[400px] md:w-[500px] h-[300px] sm:h-[400px] md:h-[500px] bg-recording rounded-full blur-[100px] sm:blur-[120px] md:blur-[150px] opacity-5 animate-pulse"></div>
+
+            <h2 class="font-header text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl mb-6 sm:mb-8 relative z-10 interactable glitch-hover">
+                LET'S MAKE <br><span class="text-recording">NOISE</span>.
+            </h2>
+
+            <a href="mailto:contact@nodarshonia.com" class="font-mono text-sm sm:text-base md:text-lg lg:text-xl text-gray-400 hover:text-white transition-colors relative z-10 interactable border-b border-transparent hover:border-recording pb-1 mb-8 sm:mb-12">
+                contact@nodarshonia.com
+            </a>
+
+            <div class="flex flex-col sm:flex-row gap-6 sm:gap-8 md:gap-12 relative z-10">
+                <a href="https://www.imdb.com/name/nm15572630/?ref_=fn_t_1" target="_blank" class="interactable flex items-center justify-center gap-2 text-xs sm:text-sm font-mono hover:text-recording transition-colors">
+                    <i data-lucide="film" class="w-3 h-3 sm:w-4 sm:h-4"></i> IMDB
+                </a>
+                <a href="#" class="interactable flex items-center justify-center gap-2 text-xs sm:text-sm font-mono hover:text-recording transition-colors">
+                    <i data-lucide="linkedin" class="w-3 h-3 sm:w-4 sm:h-4"></i> LinkedIn
+                </a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-4 sm:py-6 border-t border-subtle/20 text-center font-mono text-[9px] sm:text-[10px] uppercase text-gray-600">
+            <p>Based in Georgia. Available Worldwide.</p>
+        </footer>
+
+    </main>
+
+    <script>
+        // Mobile detection
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+
+        let lenis;
+
+        // Only initialize Lenis on desktop
+        if (!isMobile) {
+            // --- 1. SETUP LENIS (Inertia Scrolling) ---
+            // Note: smooth scrolling disabled - our magnetic system handles all scrolling
+            lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                direction: 'vertical',
+                gestureDirection: 'vertical',
+                smooth: false, // Disabled - we handle all scrolling magnetically
+                mouseMultiplier: 1,
+                smoothTouch: false,
+                touchMultiplier: 2,
+            });
+
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+        }
+
+        // Only enable magnetic scroll snapping on desktop
+        if (!isMobile) {
+            // --- 2. MAGNETIC SCROLL SNAPPING (REPLACED) ---
+
+        // Collect checkpoints.
+
+        // Includes:
+
+        // - .scroll-checkpoint (sections you marked)
+
+        // Note: .credit-row removed - individual rows are too granular for checkpoints
+
+        // De-dupe while preserving DOM order.
+
+        function collectCheckpoints() {
+
+          const nodes = Array.from(document.querySelectorAll('.scroll-checkpoint'));
+
+          // Remove duplicates (same element can match multiple selectors)
+
+          const seen = new Set();
+
+          const unique = [];
+
+          for (const el of nodes) {
+
+            if (!seen.has(el)) {
+
+              seen.add(el);
+
+              unique.push(el);
+
+            }
+
+          }
+
+          // Sort by document position (visual top-to-bottom)
+
+          unique.sort((a, b) => a.offsetTop - b.offsetTop);
+
+          return unique;
+
+        }
+
+        let checkpoints = collectCheckpoints();
+
+        // Work slider logic (desktop only)
+        let workSection, workSlides, workIndexEl, workTotalEl, workProgressEl;
+        let workActiveIndex = 0;
+        let workAnimating = false;
+        let workCheckpointIndex = -1;
+
+        if (!isMobile) {
+            workSection = document.getElementById('work');
+            workSlides = workSection ? Array.from(workSection.querySelectorAll('.work-slide')) : [];
+            workIndexEl = workSection ? workSection.querySelector('[data-work-index]') : null;
+            workTotalEl = workSection ? workSection.querySelector('[data-work-total]') : null;
+            workProgressEl = workSection ? workSection.querySelector('[data-work-progress]') : null;
+            workCheckpointIndex = workSection ? checkpoints.indexOf(workSection) : -1;
+        }
+
+        // Re-collect after dynamic DOM changes (if you ever generate credits via JS)
+
+        const checkpointObserver = new MutationObserver(() => {
+
+          checkpoints = collectCheckpoints();
+
+          workCheckpointIndex = workSection ? checkpoints.indexOf(workSection) : -1;
+
+          updateCurrentCheckpoint();
+
+        });
+
+        checkpointObserver.observe(document.body, { childList: true, subtree: true });
+
+        let isSnapping = false;
+
+        let currentCheckpointIndex = 0;
+
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        // Work slider functions (desktop only)
+        if (!isMobile) {
+            function formatWorkIndex(value) {
+              return String(value + 1).padStart(2, '0');
+            }
+
+            function updateWorkUI() {
+          if (!workSlides.length) return;
+
+          if (workIndexEl) workIndexEl.textContent = formatWorkIndex(workActiveIndex);
+          if (workTotalEl) workTotalEl.textContent = String(workSlides.length).padStart(2, '0');
+          if (workProgressEl) {
+            const progress = workSlides.length === 1 ? 1 : (workActiveIndex + 1) / workSlides.length;
+            workProgressEl.style.transform = `scaleY(${progress})`;
+          }
+        }
+
+        function setWorkSlidePositions() {
+          if (!workSlides.length) return;
+
+          workSlides.forEach((slide, index) => {
+            const offset = index - workActiveIndex;
+
+            gsap.set(slide, {
+              xPercent: offset * 100,
+              opacity: offset === 0 ? 1 : 0,
+              scale: offset === 0 ? 1 : 0.98,
+              rotateY: 0,
+              zIndex: offset === 0 ? 2 : 1
+            });
+
+            slide.classList.toggle('is-active', offset === 0);
+          });
+
+          updateWorkUI();
+        }
+
+        function goToWorkSlide(nextIndex, direction) {
+          if (workAnimating) return false;
+          if (nextIndex < 0 || nextIndex >= workSlides.length) return false;
+
+          const current = workSlides[workActiveIndex];
+          const next = workSlides[nextIndex];
+
+          workAnimating = true;
+
+          const offset = direction > 0 ? 110 : -110;
+          const rotate = prefersReducedMotion ? 0 : 6;
+          const duration = prefersReducedMotion ? 0.25 : 0.9;
+
+          gsap.set(next, {
+            xPercent: offset,
+            opacity: 1,
+            scale: 1,
+            rotateY: direction * rotate,
+            zIndex: 3
+          });
+
+          next.classList.add('is-active');
+
+          gsap.timeline({
+            defaults: { duration, ease: 'power3.inOut' },
+            onComplete: () => {
+              workActiveIndex = nextIndex;
+              workAnimating = false;
+              setWorkSlidePositions();
+            }
+          })
+          .to(current, {
+            xPercent: -offset,
+            opacity: 0.5,
+            scale: 0.98,
+            rotateY: -direction * rotate
+          }, 0)
+          .to(next, {
+            xPercent: 0,
+            opacity: 1,
+            scale: 1,
+            rotateY: 0
+          }, 0);
+
+          return true;
+        }
+
+        function tryAdvanceWork(direction) {
+          if (!workSection || !workSlides.length) return false;
+          if (currentCheckpointIndex !== workCheckpointIndex) return false;
+          if (!direction) return false;
+          if (workAnimating) return true;
+
+          return goToWorkSlide(workActiveIndex + direction, direction);
+        }
+
+            if (workSlides.length) {
+              setWorkSlidePositions();
+            }
+        }
+
+        // Wheel gesture gating
+
+        let wheelLocked = false;
+
+        let wheelUnlockTimer = null;
+
+        // How quickly you allow another checkpoint jump (ms)
+
+        const WHEEL_LOCK_MS = 700;
+
+        // Accumulate tiny deltas (trackpads can send a million micro-deltas)
+
+        let wheelAccum = 0;
+
+        const WHEEL_ACCUM_THRESHOLD = 5; // lower = more sensitive
+
+        function updateCurrentCheckpoint() {
+
+          const scrollPos = lenis.scroll;
+
+          let closestIndex = 0;
+
+          let minDistance = Infinity;
+
+          for (let i = 0; i < checkpoints.length; i++) {
+
+            const top = checkpoints[i].offsetTop;
+
+            const d = Math.abs(scrollPos - top);
+
+            if (d < minDistance) {
+
+              minDistance = d;
+
+              closestIndex = i;
+
+            }
+
+          }
+
+          currentCheckpointIndex = closestIndex;
+
+        }
+
+        function snapToCheckpoint(index) {
+
+          if (index < 0 || index >= checkpoints.length) return;
+
+          if (isSnapping) return;
+
+          isSnapping = true;
+
+          const prevIndex = currentCheckpointIndex;
+          currentCheckpointIndex = index;
+
+          const element = checkpoints[index];
+
+          if (element === workSection && workSlides.length) {
+            if (index > prevIndex) {
+              workActiveIndex = 0;
+            } else if (index < prevIndex) {
+              workActiveIndex = workSlides.length - 1;
+            }
+
+            setWorkSlidePositions();
+          }
+
+          const offset = 0;
+
+          lenis.scrollTo(element, {
+
+            offset: offset,
+
+            duration: 1.0,
+
+            easing: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+
+            onComplete: () => {
+
+              isSnapping = false;
+
+              // keep index accurate if layout shifts
+
+              updateCurrentCheckpoint();
+
+            }
+
+          });
+
+        }
+
+        // Keep current index updated as user lands.
+
+        lenis.on('scroll', () => {
+
+          if (!isSnapping) updateCurrentCheckpoint();
+
+        });
+
+        // Hard-intercept wheel so "even slight scroll" becomes "jump to next/prev".
+
+        // Note: this is intentionally aggressive. You asked for magnetic.
+
+        window.addEventListener('wheel', (e) => {
+
+          // Only handle vertical intent
+
+          if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+
+          // Stop default scrolling immediately - this is critical
+
+          e.preventDefault();
+
+          e.stopPropagation();
+
+          // Don't allow any scrolling during snaps
+
+          if (isSnapping) return;
+
+          // Accumulate tiny trackpad deltas
+
+          wheelAccum += e.deltaY;
+
+          // Lower threshold for more responsive snapping
+
+          if (Math.abs(wheelAccum) < WHEEL_ACCUM_THRESHOLD) return;
+
+          // Gate repeated triggers
+
+          if (wheelLocked) {
+
+            wheelAccum = 0; // Reset accumulator if locked
+
+            return;
+
+          }
+
+          wheelLocked = true;
+
+          clearTimeout(wheelUnlockTimer);
+
+          wheelUnlockTimer = setTimeout(() => {
+
+            wheelLocked = false;
+
+            wheelAccum = 0;
+
+          }, WHEEL_LOCK_MS);
+
+          const direction = Math.sign(wheelAccum);
+
+          wheelAccum = 0;
+
+          // If we're inside the work section, ALWAYS try slides first
+          if (currentCheckpointIndex === workCheckpointIndex) {
+            const advanced = tryAdvanceWork(direction);
+            if (advanced) return;
+          }
+
+          // Only move page if slides are done (or we're not in work section)
+          if (direction > 0) {
+            snapToCheckpoint(currentCheckpointIndex + 1);
+          } else if (direction < 0) {
+            snapToCheckpoint(currentCheckpointIndex - 1);
+          }
+
+        }, { passive: false, capture: true });
+
+        // Touch (mobile): swipe up/down jumps checkpoints.
+
+        // SmoothTouch is false in your Lenis config, so native touch scrolling can bypass.
+
+        // This makes touch behave like magnetic snaps too.
+
+        let touchStartY = 0;
+
+        let touchStartX = 0;
+
+        window.addEventListener('touchstart', (e) => {
+
+          if (!e.touches || !e.touches[0]) return;
+
+          touchStartY = e.touches[0].clientY;
+
+          touchStartX = e.touches[0].clientX;
+
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+
+          if (!e.touches || !e.touches[0]) return;
+
+          const dy = touchStartY - e.touches[0].clientY;
+
+          const dx = touchStartX - e.touches[0].clientX;
+
+          // vertical swipe intent
+
+          if (Math.abs(dy) <= Math.abs(dx)) return;
+
+          // Always prevent default for vertical touch moves to avoid conflicts
+
+          e.preventDefault();
+
+          if (isSnapping) return;
+
+          // If swipe is meaningful, snap once and then reset start point
+
+          if (Math.abs(dy) > 20) {
+
+            const direction = dy > 0 ? 1 : -1;
+
+            if (!tryAdvanceWork(direction)) {
+              if (direction > 0) snapToCheckpoint(currentCheckpointIndex + 1);
+              else snapToCheckpoint(currentCheckpointIndex - 1);
+            }
+
+            // reset to avoid multi-trigger in one swipe
+
+            touchStartY = e.touches[0].clientY;
+
+            touchStartX = e.touches[0].clientX;
+
+          }
+
+        }, { passive: false });
+
+        // Keyboard navigation + work slider
+
+        document.addEventListener('keydown', (e) => {
+
+          if (isSnapping) return;
+
+          if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+
+            e.preventDefault();
+
+            if (!tryAdvanceWork(1)) snapToCheckpoint(currentCheckpointIndex + 1);
+
+          } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+
+            e.preventDefault();
+
+            if (!tryAdvanceWork(-1)) snapToCheckpoint(currentCheckpointIndex - 1);
+
+          } else if (e.key === 'ArrowRight') {
+
+            if (tryAdvanceWork(1)) e.preventDefault();
+
+          } else if (e.key === 'ArrowLeft') {
+
+            if (tryAdvanceWork(-1)) e.preventDefault();
+
+          } else if (e.key === 'Home') {
+
+            e.preventDefault();
+
+            snapToCheckpoint(0);
+
+          } else if (e.key === 'End') {
+
+            e.preventDefault();
+
+            snapToCheckpoint(checkpoints.length - 1);
+
+          }
+
+        });
+
+        // Initial index
+
+        updateCurrentCheckpoint();
+
+
+
+
+        }
+        // Custom cursor logic (desktop only)
+        if (!isMobile) {
+            const cursorDot = document.getElementById('cursor-dot');
+            const cursorRing = document.getElementById('cursor-ring');
+        
+        let mouseX = 0, mouseY = 0;
+        let ringX = 0, ringY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Dot follows instantly
+            cursorDot.style.left = mouseX + 'px';
+            cursorDot.style.top = mouseY + 'px';
+        });
+
+        // Smooth ring lerp
+        function animateCursor() {
+            ringX += (mouseX - ringX) * 0.15;
+            ringY += (mouseY - ringY) * 0.15;
+            
+            cursorRing.style.left = ringX + 'px';
+            cursorRing.style.top = ringY + 'px';
+            
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Hover states for cursor
+        document.querySelectorAll('a, button, .interactable').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hover-active'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hover-active'));
+        });
+        }
+        const creditsContainer = document.getElementById('credits-container');
+        const preview = document.getElementById('credit-preview');
+        const previewContent = document.getElementById('preview-placeholder');
+
+        // Image Mapping
+        const projectImages = {
+            "Lucky Lu": "https://m.media-amazon.com/images/M/MV5BYjY2ZWMwOWUtYmJmNC00OWY2LTg0MjItZGJhMzQwNDRhNjFkXkEyXkFqcGc@._V1_FMjpg_UX686_.jpg",
+            "Dying For Sex": "https://resizing.flixster.com/VcmbVmf8dxy-MWv4V3qgwMLtQaM=/fit-in/705x460/v2/https://resizing.flixster.com/-XZAfHZM39UwaGJIFWKAE8fS0ak=/v3/t/assets/p29500713_i_v13_aa.jpg",
+            "The Mastermind": "https://m.media-amazon.com/images/M/MV5BYmEzYzMwZDUtMjdiYi00YmRlLWJiNjYtYzY2N2E3ZWZjOTcxXkEyXkFqcGc@._V1_QL75_UX380_CR0,0,380,562_.jpg",
+            "The Family McMullen": "https://m.media-amazon.com/images/M/MV5BYWFlMjQzMDEtMDIyYi00Zjk1LWI1ODQtZmY3NWFkN2YzOTBmXkEyXkFqcGc@._V1_QL75_UY562_CR35,0,380,562_.jpg",
+            "M.R.I.": "https://m.media-amazon.com/images/M/MV5BY2Q3YTRiYTEtMWIwNC00YzgwLWEyMWItYmMxYmRhYjNjNzc5XkEyXkFqcGc@._V1_QL75_UX380_CR0,0,380,562_.jpg",
+            "An Inexact Science": "https://m.media-amazon.com/images/M/MV5BOTYyODlhNzgtM2EyMy00MzNkLWJhMTEtZTVhM2QzNzQxZGNmXkEyXkFqcGc@._V1_QL75_UX380_CR0,0,380,562_.jpg"
+        };
+
+        const creditRows = document.querySelectorAll('.credit-row');
+
+        creditRows.forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                // Prefer explicit data-image; fall back to visible title if missing.
+                const projectName = row.getAttribute('data-image') || row.querySelector('.font-bold')?.textContent?.trim() || '';
+
+                if (projectName && projectImages[projectName]) {
+                    previewContent.innerHTML = `<img src="${projectImages[projectName]}" alt="${projectName}">`;
+                } else if (projectName) {
+                    // Fallback to initials when no mapped image exists
+                    previewContent.innerHTML = "";
+                    previewContent.innerText = projectName.substring(0, 2);
+                } else {
+                    // No project name available
+                    previewContent.innerHTML = "";
+                    previewContent.innerText = "";
+                }
+
+                gsap.to(preview, { opacity: 1, scale: 1, duration: 0.3, ease: 'power2.out' });
+            });
+            
+            row.addEventListener('mouseleave', () => {
+                gsap.to(preview, { opacity: 0, scale: 0.8, duration: 0.3, ease: 'power2.in' });
+            });
+
+            row.addEventListener('mousemove', (e) => {
+                const xOffset = 20;
+                const yOffset = 20;
+                const previewWidth = preview.offsetWidth;
+                const previewHeight = preview.offsetHeight;
+                
+                let targetX = e.clientX + xOffset;
+                let targetY = e.clientY + yOffset;
+
+                // Check Right Edge: If preview goes off screen, flip to left of cursor
+                if (targetX + previewWidth > window.innerWidth) {
+                    targetX = e.clientX - previewWidth - xOffset;
+                }
+
+                // Check Bottom Edge: If preview goes off screen, flip to top of cursor
+                if (targetY + previewHeight > window.innerHeight) {
+                    targetY = e.clientY - previewHeight - yOffset;
+                }
+                
+                // GSAP smooth follow
+                gsap.to(preview, {
+                    left: targetX,
+                    top: targetY,
+                    duration: 0.5, // Laggy follow for cinematic feel
+                    ease: 'power3.out'
+                });
+            });
+        });
+
+
+        // --- 5. CANVAS SIGNAL VISUALIZATION (HERO) ---
+        const canvas = document.getElementById('noise-canvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let particles = [];
+
+        // Provide safe defaults for mouse position (used by canvas) so
+        // animateCanvas never throws if the custom cursor isn't initialized.
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.size = Math.random() * 2;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.speedY = (Math.random() - 0.5) * 0.5;
+                this.alpha = Math.random() * 0.5;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= 0.005;
+
+                if (this.alpha <= 0) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(100, 100, 100, ${this.alpha})`;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+            }
+        }
+
+        // Init Particles
+        for(let i=0; i<150; i++) particles.push(new Particle());
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw "Signal Line"
+            ctx.beginPath();
+            ctx.moveTo(0, height/2);
+            for (let i = 0; i < width; i+=10) {
+                // Combine sine wave with mouse influence for subtle interactivity
+                const dist = Math.abs(i - mouseX);
+                const influence = Math.max(0, 100 - dist) / 100; // 0 to 1
+                
+                const y = (height/2) + 
+                          Math.sin(i * 0.01 + Date.now() * 0.002) * 50 + 
+                          (Math.random() - 0.5) * 20 * influence; 
+                ctx.lineTo(i, y);
+            }
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Draw Particles
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+
+        // --- 6. GSAP ANIMATIONS ---
+        
+        // Initial Reveal
+        const tl = gsap.timeline();
+        tl.from(".reveal-header", {
+            y: 100,
+            opacity: 0,
+            duration: 1.5,
+            ease: "power4.out",
+            delay: 0.5
+        })
+        .from(".reveal-sub", {
+            y: 20,
+            opacity: 0,
+            duration: 1,
+            ease: "power2.out"
+        }, "-=1");
+
+        // Scroll Triggers
+        gsap.registerPlugin(ScrollTrigger);
+
+        const workStage = document.querySelector('.work-stage');
+        if (workStage) {
+            gsap.from(workStage, {
+                scrollTrigger: {
+                    trigger: "#work",
+                    start: "top 70%",
+                    end: "bottom top",
+                    toggleActions: "play none none reverse"
+                },
+                y: 40,
+                opacity: 0,
+                duration: 1.1,
+                ease: "power3.out"
+            });
+        }
+
+        // Initialize Icons
+        lucide.createIcons();
+    </script>
+</body>
+</html> 
